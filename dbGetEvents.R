@@ -94,9 +94,3 @@ dbGetEvents <- function(source_country, target_country, start.date, end.date) {
   }
   return(res)
 }
-
-# Test it
-# dbSetup()
-# t1 <- dbGetEvents("USA", "PER", "1992-01-01", "1995-01-01")
-
-# t1
