@@ -14,7 +14,7 @@ def aggregate():
   p.add_option('--header', '-d', default=None, help="Specify header from a separate file.")
   p.add_option('--header_sep', default=",", help="Character to split header row.")
   p.add_option('--byquad', default=False, help="Set to True to count by Quad Class")
-  p.add_option('--timeformat', default="%Y%m%d", help="The time format to pass to strptime")
+  p.add_option('--timeformat', default="%Y-%m-%d", help="The time format to pass to strptime")
 
   options, arguments = p.parse_args()
 
@@ -36,7 +36,7 @@ def aggregate():
     line = line.replace('"','').replace("\n", '').split(seperator)
     if len(headers) == 0:
       headers = line
-    elif date_ix and line[date_ix] == "data":
+    elif date_ix and line[date_ix] == "date":
       # This is a cludge to skip repeated headers in multiple files
       continue
 
@@ -58,10 +58,7 @@ def aggregate():
       this_date = datetime.strptime(line[date_ix], options.timeformat)
       country_1 = line[actor1_geo_country_code_ix]
       country_2 = line[actor2_geo_country_code_ix]
-      # actor_1_type = line[actor1_type1_code_ix]
-      # actor_2_type = line[actor2_type1_code_ix]
       event_root_code = line[root_code_ix][:2]
-      # quad_class_val = line[quad_class_ix]
     except:
       continue
 
@@ -78,18 +75,11 @@ def aggregate():
       if country_2 not in counts[this_date.year][this_date.month][country_1].keys():
         counts[this_date.year][this_date.month][country_1][country_2] = {}
 
-        if options.byquad:
-          for quad_class in quad_classes:
-            counts[this_date.year][this_date.month][country_1][country_2][quad_class] = 0
-        else:
-          for event_code in event_codes:
-            counts[this_date.year][this_date.month][country_1][country_2][event_code] = 0
+        for event_code in event_codes:
+          counts[this_date.year][this_date.month][country_1][country_2][event_code] = 0
 
       try:
-        if options.byquad:
-          counts[this_date.year][this_date.month][country_1][country_2][quad_class_val] += 1
-        else:
-          counts[this_date.year][this_date.month][country_1][country_2][event_root_code] += 1
+        counts[this_date.year][this_date.month][country_1][country_2][event_root_code] += 1
 
       except:
         continue 
@@ -106,13 +96,11 @@ def aggregate():
               for event_code in event_codes:
                 counts[year][month][country_1][country_2][event_code] = counts[year][month][country_1][country_2][event_code] or 0
 
-  if options.byquad:
-    eventcodestr = ",".join('quad' + i for i in event_codes)
-  else:
-    eventcodestr = ",".join('event' + i for i in event_codes)
+  eventcodestr = ",".join('event' + i for i in event_codes)
 
   col_names = "year,month,source,target," + eventcodestr + "\n"
-  formatted_string = ",".join(["%s"] * (4 + len(event_codes) ) + "\n"
+  print(col_names)
+  formatted_string = ",".join(["%s"] * (4 + len(event_codes) )) + "\n"
   sys.stdout.write(col_names)
   for year in counts.keys():
     for month in counts[year].keys():
@@ -123,3 +111,7 @@ def aggregate():
 
 if __name__ == '__main__':
   aggregate()
+
+
+# usage:
+# python icews-agg.py < sampled_output.csv --limit_rows 10000 > outfile.csv -d header.csv
