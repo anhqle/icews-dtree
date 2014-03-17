@@ -99,7 +99,6 @@ def aggregate():
   eventcodestr = ",".join('event' + i for i in event_codes)
 
   col_names = "year,month,source,target," + eventcodestr + "\n"
-  print(col_names)
   formatted_string = ",".join(["%s"] * (4 + len(event_codes) )) + "\n"
   sys.stdout.write(col_names)
   for year in counts.keys():
