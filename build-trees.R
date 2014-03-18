@@ -25,6 +25,8 @@ data = full_data[full_data$year<=2005,]
 test = full_data[full_data$year> 2005,]
 dim(data)
 dim(test)
+save(data, file="data.rda")
+save(test, file="test.rda")
 
 # modeling
 
@@ -97,11 +99,21 @@ head(yhat)
 summary(yhat)
 sum(as.numeric(yhat!=yobs))/sum(yobs) # 1.009
 
+length(which(yhat==0 & yobs==0))
+length(which(yhat==0 & yobs==1))
+length(which(yhat==1 & yobs==0))
+length(which(yhat==1 & yobs==1))
+
 
 # out-of-sample performance
 
 yhat_test = as.numeric(predict(tree_mine_pruned, type='class', newdata=test))-1
 yobs_test = test$hostile4
 sum(as.numeric(yhat_test!=yobs_test))/sum(yobs_test) # 1.31
+
+length(which(yhat==0 & yobs==0))
+length(which(yhat==0 & yobs==1))
+length(which(yhat==1 & yobs==0))
+length(which(yhat==1 & yobs==1))
 
 # see plot-trees.R, etc 
