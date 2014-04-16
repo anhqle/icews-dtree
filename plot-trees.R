@@ -1,16 +1,17 @@
 # set up
-setwd('~/desktop/icews-dtree')
+# setwd('~/desktop/icews-dtree')
 library(tikzDevice)
 
 # load trees
-load("data.rda")
-load("yhat.rda")
-load("yobs.rda")
+# load("data.rda")
+# load("yhat.rda")
+# load("yobs.rda")
 
-load("test.rda")
-load("tree_mine.rda")
-load("tree_mine_pruned.rda")
-
+# load("test.rda")
+# load("tree_mine.rda")
+# load("tree_mine_pruned.rda")
+load("tree_mine_mdp.rda")
+load("tree_mine_pruned_mdp.rda")
 
 summary(tree_mine)
 prp(tree_mine)
@@ -39,7 +40,9 @@ splitlabs = function(x, labs, digits, varlen, faclen){
   tmp = gsub("event17", "Coerce",       tmp)
   tmp = gsub("event18", "Assault",      tmp)
   tmp = gsub("event19", "Fight",        tmp)
-  tmp = gsub("event20", "Violence", tmp)
+  tmp = gsub("event20", "Violence",     tmp)
+  tmp = gsub("distance", "Distance",     tmp)
+  tmp = gsub("poldist", "PolityDiff",     tmp)
   # tmp = gsub("quad2p", "Material Coop (\\%)", tmp, fixed=TRUE)
   return(tmp)
 }
@@ -60,10 +63,9 @@ prp(tree_mine_pruned, extra=7,
   box.col=c(green, red)[tree_mine_pruned$frame$yval])
 legend("topright", pch=16, col=c(green, red), 
   legend=c("Peace", "War"),
-  inset=.1)
+  inset=c(.1, .2))
 
-
-pdf('tree-icews.pdf', width=4, height=6)
+pdf('tree-icews-polity.pdf', width=5, height=6)
 prp(tree_mine_pruned, extra=7,
   node.fun=nodelabs, 
   split.fun=splitlabs,

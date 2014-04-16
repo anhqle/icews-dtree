@@ -5,7 +5,7 @@ library(rpart.plot)   # Enhanced tree plots
 
 # load data
 getwd()
-full_data = read.csv("merged.csv", as.is=TRUE)
+full_data = read.csv("icews-mdp.csv", as.is=TRUE)
 dim(full_data)
 names(full_data)
 
@@ -25,8 +25,8 @@ data = full_data[full_data$year<=2005,]
 test = full_data[full_data$year> 2005,]
 dim(data)
 dim(test)
-save(data, file="data.rda")
-save(test, file="test.rda")
+save(data, file="data-mdp.rda")
+save(test, file="test-mdp.rda")
 
 # modeling
 
@@ -50,7 +50,10 @@ form_mine = as.formula(hostile4 ~
   event17 + 
   event18 + 
   event19 +
-  event20
+  event20 +
+  distance +
+  jointD +
+  poldist
 )
 
 # build trees 
@@ -68,11 +71,11 @@ printcp(tree_mine)
 prp(tree_mine)
 
 
-tree_mine_pruned = prune(tree_mine, cp=printcp(tree_mine)[2] )
+tree_mine_pruned = prune(tree_mine, cp=printcp(tree_mine)[3] )
 prp(tree_mine_pruned)
 
-save(tree_mine, file="tree_mine.rda")
-save(tree_mine_pruned, file="tree_mine_pruned.rda")
+save(tree_mine, file="tree_mine_mdp.rda")
+save(tree_mine_pruned, file="tree_mine_pruned_mdp.rda")
 
 
 # in-sample performance
@@ -82,8 +85,8 @@ yobs = ifelse(is.na(yobs), 0, yobs)
 yhat = as.numeric(yhat) - 1
 summary(yhat)
 summary(yobs)
-save(yhat, file="yhat.rda")
-save(yobs, file="yobs.rda")
+save(yhat, file="yhat-mdp.rda")
+save(yobs, file="yobs-mdp.rda")
 
 
 length(yobs)
@@ -111,10 +114,10 @@ yhat_test = as.numeric(predict(tree_mine_pruned, type='class', newdata=test))-1
 yobs_test = test$hostile4
 sum(as.numeric(yhat_test!=yobs_test))/sum(yobs_test) # 1.31
 
-length(which(yhat==0 & yobs==0))
-length(which(yhat==0 & yobs==1))
-length(which(yhat==1 & yobs==0))
-length(which(yhat==1 & yobs==1))
+length(which(yhat_test==0 & yobs_test==0))
+length(which(yhat_test==0 & yobs_test==1))
+length(which(yhat_test==1 & yobs_test==0))
+length(which(yhat_test==1 & yobs_test==1))
 
 
 
@@ -141,8 +144,8 @@ recall = function(est, obs){
 }
 
 ## training set
-load("yhat.rda")
-load("yobs.rda")
+load("yhat-mdp.rda")
+load("yobs-mdp.rda")
 
 # null model
 zeroes = rep(0, length(yobs))
@@ -166,11 +169,15 @@ mse(yhat, yobs)
 precision(yhat, yobs)
 recall(yhat, yobs)
 
+summary(yhat)
+
 
 
 ## test set
 yhat_test = as.numeric(predict(tree_mine_pruned, type='class', newdata=test))-1
+summary(yhat_test)
 yobs_test = test$hostile4
+summary(yobs_test)
 
 zeroes = rep(0, length(yobs_test))
 mse(zeroes, yobs_test)
